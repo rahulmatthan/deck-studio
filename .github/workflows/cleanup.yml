@@ -1,0 +1,46 @@
+name: cleanup expired decks
+on:
+  schedule:
+    - cron: '17 * * * *'   # hourly, at :17
+  workflow_dispatch: {}      # allow manual run from the Actions tab
+permissions:
+  contents: write
+concurrency:
+  group: cleanup
+  cancel-in-progress: false
+jobs:
+  clean:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Delete expired published decks
+        run: |
+          node <<'EOF'
+          const fs = require('fs');
+          const cp = require('child_process');
+          const dir = 'd';
+          if (!fs.existsSync(dir)) { console.log('no d/ dir'); process.exit(0); }
+          const now = Date.now();
+          let changed = false;
+          for (const f of fs.readdirSync(dir)) {
+            if (!f.endsWith('.html')) continue;      // published deck files are <id>.<epoch|x>.html
+            const parts = f.split('.');
+            const ep = parts[parts.length - 2];      // the epoch (or 'x' for never)
+            if (ep === 'x' || ep === undefined) continue;
+            const t = parseInt(ep, 10);
+            if (Number.isFinite(t) && now > t) {
+              fs.unlinkSync(`${dir}/${f}`);
+              console.log('deleted expired', f);
+              changed = true;
+            }
+          }
+          if (changed) {
+            cp.execSync('git config user.name "github-actions[bot]"');
+            cp.execSync('git config user.email "41898282+github-actions[bot]@users.noreply.github.com"');
+            cp.execSync('git add -A');
+            cp.execSync('git commit -m "cleanup: remove expired published decks"');
+            cp.execSync('git push');
+          } else {
+            console.log('nothing to clean');
+          }
+          EOF
