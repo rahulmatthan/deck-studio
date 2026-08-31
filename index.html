@@ -710,10 +710,10 @@ document.addEventListener('visibilitychange',function(){if(fs()&&document.visibi
   window.addEventListener('beforeunload',function(e){ if(dirty){e.preventDefault();e.returnValue='';} });
 
   // ===== Publish to GitHub Pages (shareable links + timed expiry + revoke) =====
-  var GH={owner:'rahulmatthan',repo:'deck-studio',branch:'main'};
-  try{var sr=JSON.parse(localStorage.getItem('gh_repo')||'null'); if(sr&&sr.owner&&sr.repo){GH.owner=sr.owner;GH.repo=sr.repo;}}catch(e){}
+  var GH={owner:'rahulmatthan',repo:'deck-studio',branch:'main',site:'https://exmachina.in/deck-studio'};
+  try{var sr=JSON.parse(localStorage.getItem('gh_repo')||'null'); if(sr&&sr.owner&&sr.repo){GH.owner=sr.owner;GH.repo=sr.repo; if(sr.site)GH.site=sr.site;}}catch(e){}
   function ghToken(){try{return localStorage.getItem('gh_token')||'';}catch(e){return '';}}
-  function pagesBase(){return 'https://'+GH.owner+'.github.io/'+GH.repo;}
+  function pagesBase(){return GH.site||('https://'+GH.owner+'.github.io/'+GH.repo);}
   function ghApi(p){return 'https://api.github.com/repos/'+GH.owner+'/'+GH.repo+p;}
   function ghHeaders(){return {'Authorization':'Bearer '+ghToken(),'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'};}
   function b64(s){return btoa(unescape(encodeURIComponent(s)));}

@@ -4,8 +4,8 @@ A single-file, self-contained web app for building 16:9 HTML slide decks in Rahu
 hosted on GitHub Pages so it's usable from any machine. Decks save straight to your Mac
 (`~/Documents/speaking`), and can optionally be published as shareable links with a timed expiry.
 
-- **Studio:** https://rahulmatthan.github.io/deck-studio/
-- **Published decks:** `https://rahulmatthan.github.io/deck-studio/d/<id>.<expiry>.html`
+- **Studio:** https://exmachina.in/deck-studio/
+- **Published decks:** `https://exmachina.in/deck-studio/d/<id>.<expiry>.html`
 
 ## One-time setup
 
@@ -27,7 +27,7 @@ gh repo create deck-studio --public --source=. --remote=origin --push
 ### 2. Turn on GitHub Pages
 Repo → **Settings → Pages** → *Build and deployment* → Source: **Deploy from a branch** →
 Branch: **main**, folder **/(root)** → Save. Give it a minute; Studio appears at
-`https://rahulmatthan.github.io/deck-studio/`.
+`https://exmachina.in/deck-studio/`.
 
 ### 3. Make a fine-grained token (only needed to *publish* links)
 github.com → **Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate**:
