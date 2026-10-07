@@ -191,7 +191,8 @@
   .slide.active .rise{animation:rise .55s .04s cubic-bezier(.2,.7,.2,1) forwards}
   .slide.active .rise.d2{animation-delay:.15s}.slide.active .rise.d3{animation-delay:.28s}
   @keyframes rise{to{opacity:1;transform:none}}
-  .frag{display:none}
+  .frag:not(.bld){display:none}
+  .frag.bld{visibility:hidden}.frag.bld.shown{visibility:visible;animation:fragin .5s cubic-bezier(.2,.7,.2,1)}
   .list li.frag,.tlist li.frag,.steps li.frag{visibility:hidden}
   .list li.frag{display:flex}.tlist li.frag{display:grid}.steps li.frag{display:flex}
   .list li.frag.shown,.tlist li.frag.shown,.steps li.frag.shown{visibility:visible;animation:fragin .5s cubic-bezier(.2,.7,.2,1)}
@@ -221,6 +222,7 @@
   #stage .rise{opacity:1!important;transform:none!important;animation:none!important}
   #stage .frag{visibility:visible!important;opacity:1!important}
   #stage .list li.frag{display:flex!important}#stage .tlist li.frag{display:grid!important}#stage .steps li.frag{display:flex!important}
+  #stage .frag{outline:1.5px dashed color-mix(in srgb,var(--accent) 60%,transparent);outline-offset:5px;border-radius:2px}
   [contenteditable]{outline:none}
   [contenteditable]:hover{box-shadow:0 0 0 1px rgba(120,140,170,.4);border-radius:3px}
   [contenteditable]:focus{box-shadow:0 0 0 2px var(--accent);border-radius:3px}
@@ -375,6 +377,7 @@ document.addEventListener('visibilitychange',function(){if(fs()&&document.visibi
         <button id="tEdit">Edit text: off</button>
         <button id="tAccent" title="Wrap selection in accent (Cmd+E)">Accent</button>
         <button id="tBold" title="Bold">Bold</button>
+        <button id="tBuild" title="Click into a line of text, then toggle whether it appears on its own click (Cmd+K)">Build</button>
         <span class="sep" style="height:18px;background:var(--line);width:1px"></span>
         <button id="tUp" title="Move up">▲</button>
         <button id="tDown" title="Move down">▼</button>
@@ -566,7 +569,7 @@ document.addEventListener('visibilitychange',function(){if(fs()&&document.visibi
     cv.srcdoc=buildPreview();
     cv.onload=function(){ if(editMode) hookEditing(); };
   }
-  function renderAll(){renderList();renderCanvas();syncBar();}
+  function renderAll(){lastEd=null;renderList();renderCanvas();syncBar();syncBuildBtn();}
   function syncBar(){
     $('#selTheme').value=model.theme; $('#cbDark').checked=model.dark;
     $('#cbChrome').checked=model.chrome;
@@ -580,9 +583,11 @@ document.addEventListener('visibilitychange',function(){if(fs()&&document.visibi
   function hookEditing(){
     var doc=$('#cv').contentDocument; if(!doc)return;
     doc.addEventListener('input',function(){ clearTimeout(syncT); syncT=setTimeout(function(){pullEdits();},250); });
+    doc.addEventListener('focusin',function(e){ lastEd=e.target; syncBuildBtn(); });
     doc.addEventListener('keydown',function(e){
       if((e.metaKey||e.ctrlKey)&&(e.key==='e'||e.key==='E')){e.preventDefault();wrapSel('em');}
       else if((e.metaKey||e.ctrlKey)&&(e.key==='b'||e.key==='B')){e.preventDefault();wrapSel('b');}
+      else if((e.metaKey||e.ctrlKey)&&(e.key==='k'||e.key==='K')){e.preventDefault();toggleBuild();}
       else if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();}
     });
   }
@@ -595,6 +600,24 @@ document.addEventListener('visibilitychange',function(){if(fs()&&document.visibi
     model.slides[sel]=clone.outerHTML; setDirty(true);
     // update sidebar label only (don't touch iframe -> keep cursor)
     var row=$('#list').children[sel]; if(row) row.querySelector('.txt').textContent=firstText(model.slides[sel])||'(empty)';
+  }
+  var lastEd=null;
+  function buildTarget(){
+    var doc=$('#cv').contentDocument;
+    if(!editMode||!lastEd||!doc||!doc.contains(lastEd))return null;
+    return lastEd.closest('li')||lastEd;
+  }
+  function buildCount(){ var d=document.createElement('div');d.innerHTML=model.slides[sel]||'';return d.querySelectorAll('.frag').length; }
+  function syncBuildBtn(){
+    var t=buildTarget(); $('#tBuild').classList.toggle('on',!!(t&&t.classList.contains('frag')));
+    var n=buildCount(); if(model.slides.length) $('#posHint').textContent='Slide '+(sel+1)+' of '+model.slides.length+(n?' · '+n+' build'+(n>1?'s':''):'');
+  }
+  function toggleBuild(){
+    var t=buildTarget();
+    if(!t){toast(editMode?'Click into the text you want to build first.':'Turn on Edit text, then click into the text you want to build.');return;}
+    if(t.classList.contains('frag')){t.classList.remove('frag','bld','shown');toast('Shows with the slide.');}
+    else{t.classList.add('frag','bld');toast('Appears on its own click.');}
+    pullEdits(); syncBuildBtn();
   }
   function wrapSel(tag){
     var doc=$('#cv').contentDocument, s=doc.getSelection();
@@ -701,6 +724,8 @@ document.addEventListener('visibilitychange',function(){if(fs()&&document.visibi
   $('#tEdit').onclick=function(){ editMode=!editMode; if(!editMode)pullEdits(); renderCanvas(); syncBar(); };
   $('#tAccent').onclick=function(){wrapSel('em');};
   $('#tBold').onclick=function(){wrapSel('b');};
+  $('#tBuild').onmousedown=function(e){e.preventDefault();};
+  $('#tBuild').onclick=toggleBuild;
   $('#tUp').onclick=function(){op('up');};
   $('#tDown').onclick=function(){op('down');};
   $('#tDup').onclick=function(){op('dup');};
