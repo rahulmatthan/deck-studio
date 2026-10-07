@@ -281,7 +281,7 @@
 <!-- IN-DECK EDITOR (optional, injected before </body> when enabled) -->
 <script type="text/plain" id="tpl-ineditor">
 (function(){
-  var EDSEL='.cover-t,.eyebrow,.idea,.note,.heading,.divider,.stat,.stat-sub,.kicker,.quote,.attr,.list li,.tlist .t,.tlist .d,.cmp .tag,.cmp h3,.cmp p,.steps .s';
+  var EDSEL='.cover-t,.eyebrow,.idea,.note,.heading,.divider,.stat,.stat-sub,.kicker,.quote,.attr,.list li,.tlist .t,.tlist .d,.cmp .tag,.cmp h3,.cmp p,.steps .s,[data-ed]';
   var editing=false, handle=null;
   var btnE=document.createElement('button'), btnS=document.createElement('button');
   var css=document.createElement('style');
@@ -434,7 +434,7 @@ document.addEventListener('visibilitychange',function(){if(fs()&&document.visibi
       KFONTS=read('kfonts'), CHROME=read('chrome-html'), INEDITOR=read('tpl-ineditor'), WAKE=read('tpl-wake'), GATE=read('tpl-gate');
   var TOK={keynote:read('tok-keynote'),navy:read('tok-navy'),editorial:read('tok-editorial')};
   var FONTHEAD={keynote:KFONTS,navy:read('font-navy'),editorial:read('font-editorial')};
-  var EDSEL='.cover-t,.eyebrow,.idea,.note,.heading,.divider,.stat,.stat-sub,.kicker,.quote,.attr,.list li,.tlist .t,.tlist .d,.cmp .tag,.cmp h3,.cmp p,.steps .s';
+  var EDSEL='.cover-t,.eyebrow,.idea,.note,.heading,.divider,.stat,.stat-sub,.kicker,.quote,.attr,.list li,.tlist .t,.tlist .d,.cmp .tag,.cmp h3,.cmp p,.steps .s,[data-ed]';
 
   // ---- layout palette ----
   var LAYOUTS=[
@@ -473,7 +473,8 @@ document.addEventListener('visibilitychange',function(){if(fs()&&document.visibi
   }
 
   // ---- build documents ----
-  function headFor(theme){ return FONTHEAD[theme]+'\n<style>'+CSS+'\n'+TOK[theme]+'</style>'; }
+  function deckCss(){ return model.extraCss?'\n<style id="deck-css">'+model.extraCss+'</style>':''; }
+  function headFor(theme){ return FONTHEAD[theme]+'\n<style>'+CSS+'\n'+TOK[theme]+'</style>'+deckCss(); }
 
   function buildPreview(){
     var slideHTML=model.slides[sel]||'';
@@ -497,7 +498,7 @@ document.addEventListener('visibilitychange',function(){if(fs()&&document.visibi
     var title=(model.title||'Presentation');
     return '<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="UTF-8">\n'+
       '<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">\n'+
-      '<title>'+title+'</title>\n'+FONTHEAD[model.theme]+'\n<style>'+CSS+'\n'+TOK[model.theme]+'</style>\n</head>\n'+
+      '<title>'+title+'</title>\n'+FONTHEAD[model.theme]+'\n<style>'+CSS+'\n'+TOK[model.theme]+'</style>'+deckCss()+'\n</head>\n'+
       '<body class="'+(model.dark?'dark':'light')+'">\n<div id="stage">\n'+chrome+'\n  <!-- ===== SLIDES ===== -->\n'+
       slidesOut+'\n  <!-- ===== /SLIDES ===== -->\n</div>\n'+
       '<div id="hud">\n  <span class="counter">1 / N</span><span class="sep"></span>\n'+
@@ -518,6 +519,7 @@ document.addEventListener('visibilitychange',function(){if(fs()&&document.visibi
     model.chrome=!!doc.querySelector('.chrome-logo');
     model.embed=!!doc.getElementById('ed-e')||/id=[\"']ed-e/.test(text);
     var styleTxt=''; doc.querySelectorAll('style').forEach(function(st){styleTxt+=st.textContent;});
+    var dc=doc.getElementById('deck-css'); model.extraCss=dc?dc.textContent:'';
     model.theme = /--disp:\s*'Spectral'/.test(styleTxt)?'navy' : /--disp:\s*'Fraunces'/.test(styleTxt)?'editorial' : 'keynote';
     var t=doc.querySelector('title'); model.title=t?t.textContent:'Presentation';
     sel=0; return true;
