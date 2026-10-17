@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deck Studio</title>
+<style>
+  :root{--bg:#F3F4F6;--pane:#FFFFFF;--fg:#16202E;--mut:#5E6877;--line:#DDE1E7;--soft:#EEF1F4;
+    --acc:#0094B3;--acc-fg:#fff;--red:#AA272F;--amber:#B45309;--ok:#2F7D4F;--q:#FFF4E5;--qline:#F5C98A;
+    --sh:0 1px 2px rgba(0,0,0,.06),0 6px 18px rgba(0,0,0,.06)}
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0F1216;--pane:#171B21;--fg:#E7EBF0;--mut:#98A2AF;
+    --line:#2A3038;--soft:#1F242B;--q:#2B2216;--qline:#6B4F24;--sh:0 1px 2px rgba(0,0,0,.4),0 6px 18px rgba(0,0,0,.3)}}
+  :root[data-theme="dark"]{--bg:#0F1216;--pane:#171B21;--fg:#E7EBF0;--mut:#98A2AF;--line:#2A3038;--soft:#1F242B;--q:#2B2216;--qline:#6B4F24}
+  *{box-sizing:border-box;margin:0}
+  html,body{height:100%}
+  body{background:var(--bg);color:var(--fg);font:15px/1.45 -apple-system,BlinkMacSystemFont,"Inter",system-ui,sans-serif;display:grid;grid-template-rows:auto 1fr;overflow:hidden}
+  button,select,input,textarea{font:inherit;color:inherit}
+  button{background:var(--pane);border:1px solid var(--line);border-radius:7px;padding:6px 11px;cursor:pointer;white-space:nowrap}
+  button:hover{border-color:var(--mut)}
+  button.pri{background:var(--acc);border-color:var(--acc);color:var(--acc-fg)}
+  button.ghost{border-color:transparent;background:none;color:var(--mut);padding:4px 7px}
+  button.ghost:hover{color:var(--fg);border-color:var(--line)}
+  button:disabled{opacity:.45;cursor:default}
+  select{background:var(--pane);border:1px solid var(--line);border-radius:7px;padding:5px 8px}
+  label.ck{display:inline-flex;align-items:center;gap:6px;color:var(--mut);cursor:pointer}
+
+  /* top bar */
+  #bar{display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--pane);border-bottom:1px solid var(--line);flex-wrap:wrap;position:relative;z-index:5}
+  #bar h1{font-size:15px;font-weight:700;letter-spacing:-.01em;margin-right:6px}
+  #bar .sp{flex:1}
+  #deckSel{max-width:340px}
+  .lbl{font-size:12px;color:var(--mut);margin-right:-4px}
+  .menu{position:relative}
+  .pop{display:none;position:absolute;right:0;top:calc(100% + 6px);background:var(--pane);border:1px solid var(--line);border-radius:10px;box-shadow:var(--sh);padding:14px;width:340px;z-index:20}
+  .pop.open{display:block}
+  .pop h3{font-size:13px;margin:2px 0 8px;color:var(--mut);font-weight:600}
+  .pop .row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+  .pop .out{font-size:13px;color:var(--mut);word-break:break-all}
+  .pop .out a{color:var(--acc)}
+  .pub{display:flex;justify-content:space-between;gap:8px;font-size:13px;padding:5px 0;border-top:1px solid var(--line)}
+
+  /* three panes */
+  #main{display:grid;grid-template-columns:200px 1fr 400px;min-height:0}
+  #list{overflow:auto;padding:12px 10px 40px;border-right:1px solid var(--line)}
+  .th{display:block;width:100%;padding:0;border:0;background:none;margin-bottom:12px;text-align:left;position:relative}
+  .th .box{width:176px;height:99px;border-radius:5px;overflow:hidden;border:2px solid transparent;box-shadow:var(--sh);position:relative;background:#888}
+  .th.on .box{border-color:var(--acc)}
+  .th iframe{width:1280px;height:720px;border:0;transform:scale(.1344);transform-origin:0 0;pointer-events:none}
+  .th .n{font-size:12px;color:var(--mut);margin-top:3px;display:flex;gap:6px;align-items:center}
+  .badge{background:var(--red);color:#fff;border-radius:9px;font-size:11px;font-weight:700;padding:0 6px;line-height:17px}
+  .badge.q{background:var(--amber)}
+
+  #centre{display:flex;flex-direction:column;min-width:0;min-height:0;padding:14px 18px}
+  #pv{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;position:relative}
+  #frameBox{position:relative;width:100%;aspect-ratio:16/9;max-height:100%;box-shadow:var(--sh);border-radius:4px;overflow:hidden;background:#000}
+  #frame{width:100%;height:100%;border:0;display:block}
+  #drop{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,148,179,.18);border:3px dashed var(--acc);border-radius:6px;font-size:20px;font-weight:600;color:var(--fg);z-index:3}
+  body.dragging #drop{display:flex}
+  #ctl{display:flex;align-items:center;gap:8px;margin-top:12px;flex-wrap:wrap}
+  #ctl .pos{color:var(--mut);font-variant-numeric:tabular-nums;min-width:110px}
+  #edbar{display:none;align-items:center;gap:8px;margin-top:10px;padding:8px 10px;background:var(--soft);border-radius:8px;flex-wrap:wrap}
+  body.editing #edbar{display:flex}
+  #edbar .hint{color:var(--mut);font-size:13px}
+
+  /* notes pane */
+  #side{border-left:1px solid var(--line);display:flex;flex-direction:column;min-height:0;background:var(--pane)}
+  #tabs{display:flex;border-bottom:1px solid var(--line)}
+  #tabs button{flex:1;border:0;border-radius:0;background:none;padding:12px 8px;color:var(--mut);font-weight:600;border-bottom:2px solid transparent}
+  #tabs button.on{color:var(--fg);border-bottom-color:var(--acc)}
+  #notes{flex:1;overflow:auto;padding:14px 16px}
+  .empty{color:var(--mut);font-size:14px;padding:6px 0 14px}
+  .card{border:1px solid var(--line);border-radius:9px;padding:10px 12px;margin-bottom:10px;background:var(--pane)}
+  .card.applied{opacity:.62}
+  .card.question{background:var(--q);border-color:var(--qline)}
+  .card .t{white-space:pre-wrap;word-wrap:break-word}
+  .card .meta{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:12px;color:var(--mut)}
+  .card .meta .sp{flex:1}
+  .chip{font-size:11px;font-weight:700;letter-spacing:.02em;text-transform:uppercase;border-radius:4px;padding:1px 6px}
+  .chip.open{background:#E1F3F7;color:#006F88}.chip.applied{background:#E3F1E8;color:var(--ok)}.chip.question{background:#FDE9CF;color:var(--amber)}
+  .reply{margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);font-size:14px;color:var(--mut);white-space:pre-wrap}
+  .reply b{color:var(--fg);font-weight:600}
+  .refs{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+  .refs img{height:54px;border-radius:4px;border:1px solid var(--line);cursor:zoom-in}
+  .refs a.file{font-size:12px;color:var(--acc)}
+  .answer{display:flex;gap:6px;margin-top:8px}
+  .answer textarea{flex:1;min-height:38px}
+  .prompt{border:1px solid var(--line);border-left:4px solid var(--acc);border-radius:9px;padding:10px 12px;margin-bottom:12px;background:var(--soft)}
+  .prompt h4{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--mut);margin-bottom:6px}
+  .prompt pre{white-space:pre-wrap;font:13px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace;margin-bottom:8px}
+  .speaker{margin-top:6px;border-top:1px solid var(--line);padding-top:12px}
+  .speaker summary{cursor:pointer;color:var(--mut);font-size:13px;font-weight:600}
+  .speaker div{white-space:pre-wrap;font-size:14px;color:var(--mut);margin-top:6px}
+
+  #compose{border-top:1px solid var(--line);padding:12px 16px 14px}
+  #compose textarea{width:100%;min-height:92px;resize:vertical;border:1px solid var(--line);border-radius:8px;padding:9px 10px;background:var(--bg)}
+  #compose textarea:focus,.answer textarea:focus{outline:2px solid var(--acc);outline-offset:-1px}
+  #compose .row{display:flex;align-items:center;gap:8px;margin-top:8px}
+  #compose .row .sp{flex:1}
+  #att{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+  #att span{display:inline-flex;align-items:center;gap:4px;font-size:12px;background:var(--soft);border-radius:5px;padding:2px 4px 2px 2px}
+  #att img{height:34px;border-radius:3px}
+  #foot{font-size:12px;color:var(--mut);padding:0 16px 10px}
+  .answer textarea{border:1px solid var(--line);border-radius:7px;padding:6px 8px;background:var(--pane)}
+
+  #toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(20px);background:var(--fg);color:var(--bg);padding:9px 16px;border-radius:8px;opacity:0;transition:.25s;pointer-events:none;z-index:50;max-width:80vw}
+  #toast.show{opacity:1;transform:translateX(-50%)}
+  #zoom{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;align-items:center;justify-content:center;z-index:60;cursor:zoom-out}
+  #zoom img{max-width:92vw;max-height:92vh}
+  #zoom.open{display:flex}
+  #welcome{display:none;padding:40px;max-width:640px;margin:0 auto;color:var(--mut)}
+  #welcome code{background:var(--soft);padding:1px 5px;border-radius:4px}
+  @media (max-width:1100px){#main{grid-template-columns:150px 1fr 330px}.th .box{width:128px;height:72px}.th iframe{transform:scale(.1)}}
+</style>
+</head>
+<body>
+<div id="bar">
+  <h1>Deck Studio</h1>
+  <select id="deckSel" title="Deck"></select>
+  <span class="lbl">Theme</span><select id="themeSel"></select>
+  <span class="lbl">Transitions</span><select id="transSel"></select>
+  <label class="ck"><input type="checkbox" id="logoCk"> Logo</label>
+  <label class="ck"><input type="checkbox" id="ribbonCk"> Ribbon</label>
+  <span class="sp"></span>
+  <button id="present">Present ↗</button>
+  <div class="menu"><button id="expBtn">Save final ▾</button>
+    <div class="pop" id="expPop">
+      <h3>Save to the speaking folder</h3>
+      <div class="row">
+        <button data-f="html">HTML</button><button data-f="pdf">PDF</button><button data-f="pptx">Google Slides (.pptx)</button>
+        <button class="pri" data-f="html,pdf,pptx">All three</button>
+      </div>
+      <div class="out" id="expOut">The HTML is one file with images and fonts built in, so it plays offline. The .pptx keeps text editable; in Google Drive, upload it and open with Google Slides.</div>
+    </div>
+  </div>
+  <div class="menu"><button id="pubBtn">Share link ▾</button>
+    <div class="pop" id="pubPop">
+      <h3>Publish a link (exmachina.in/deck-studio)</h3>
+      <div class="row"><select id="expiry">
+        <option value="today">Expires tonight</option><option value="24">24 hours</option><option value="72" selected>3 days</option>
+        <option value="168">7 days</option><option value="x">Never</option></select><button class="pri" id="pubGo">Publish</button></div>
+      <div class="out" id="pubOut"></div>
+      <h3 style="margin-top:12px">Live links</h3>
+      <div id="pubList" class="out">…</div>
+    </div>
+  </div>
+</div>
+
+<div id="main">
+  <div id="list"></div>
+  <div id="centre">
+    <div id="pv"><div id="frameBox"><iframe id="frame" title="Slide"></iframe><div id="drop">Drop an image to use on this slide</div></div></div>
+    <div id="ctl">
+      <button id="prev" title="Back (←)">←</button><button id="next" title="Next build or slide (→)">→</button>
+      <span class="pos" id="pos"></span>
+      <span class="lbl">This slide enters by</span><select id="slideTrans"></select>
+      <span style="flex:1"></span>
+      <button id="editBtn" title="Edit the words on this slide, or set what appears on a click">Edit slide</button>
+    </div>
+    <div id="edbar">
+      <span class="hint" id="edHint">Click any text to change it. Select a block to set how it appears.</span>
+      <span style="flex:1"></span>
+      <button class="ghost" id="wider" title="Select the block around this one">Select wider</button>
+      <span class="lbl">Appears</span><select id="buildSel" disabled>
+        <option value="">With the slide</option>
+        <optgroup label="On a click"><option value="frag">Rises in</option><option value="frag fade">Fades in</option>
+          <option value="frag zoom">Zooms in</option><option value="frag wipe">Wipes in</option>
+          <option value="frag tint">Turns accent colour</option><option value="frag strike">Gets struck through</option></optgroup>
+        <optgroup label="Automatically"><option value="rise">Rises as the slide arrives</option></optgroup>
+      </select>
+      <button id="edCancel">Cancel</button><button class="pri" id="edSave">Save</button>
+    </div>
+    <div id="welcome"></div>
+  </div>
+  <div id="side">
+    <div id="tabs"><button id="tabSlide" class="on">This slide</button><button id="tabDeck">Whole deck</button></div>
+    <div id="notes"></div>
+    <div id="compose">
+      <textarea id="txt" placeholder="What should change? Words, look, layout, an animation, a graphic…  (⌘↩ to add)"></textarea>
+      <div id="att"></div>
+      <div class="row"><button class="ghost" id="attBtn" title="Attach reference images (or paste / drop them here)">＋ Reference image</button>
+        <input type="file" id="file" accept="image/*,.pdf" multiple hidden><span class="sp"></span><button class="pri" id="add">Add note</button></div>
+    </div>
+    <div id="foot"></div>
+  </div>
+</div>
+<div id="toast"></div>
+<div id="zoom"><img alt=""></div>
+
+<script>
+(function(){
+var $=function(s){return document.querySelector(s);};
+var TRANS=[['fade','Fade'],['cut','Cut'],['dip','Dip to background'],['slide','Slide across'],['push','Push up'],['zoom','Zoom'],['rise','Rise']];
+var BUILD=['frag','fade','zoom','wipe','tint','strike','rise','d2','d3'];
+var decks=[],key=null,st=null,cur=0,curId=null,tab='slide',pending=[],editing=null,lastStamp=null,themesList=[];
+
+function api(path,opt){opt=opt||{};return fetch(path,opt).then(function(r){return r.json().then(function(j){if(!r.ok)throw new Error(j.error||r.status);return j;});});}
+function post(path,body){return api(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});}
+function D(p){return '/api/d/'+encodeURIComponent(key)+'/'+p;}
+function deckUrl(){return '/d/'+encodeURIComponent(key)+'/deck.html';}
+function toast(m,ms){var t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(function(){t.classList.remove('show');},ms||2200);}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function fill(sel,opts,val){sel.innerHTML=opts.map(function(o){return '<option value="'+esc(o[0])+'"'+(o[0]===val?' selected':'')+'>'+esc(o[1])+'</option>';}).join('');}
+
+/* ---------- decks ---------- */
+function loadDecks(){
+  return api('/api/decks').then(function(j){
+    decks=j.decks;
+    if(!decks.length){welcome(j.root);return;}
+    var want=(location.hash.match(/deck=([^&]+)/)||[])[1];want=want&&decodeURIComponent(want);
+    fill($('#deckSel'),decks.map(function(d){return [d.key,(d.private?'🔒 ':'')+d.title+(d.open?'  ('+d.open+' open)':'')];}),want||key||decks[0].key);
+    openDeck($('#deckSel').value);
+  });
+}
+function welcome(root){
+  $('#pv').style.display='none';$('#ctl').style.display='none';$('#welcome').style.display='block';
+  $('#welcome').innerHTML='<h2 style="color:var(--fg);margin-bottom:10px">No decks yet</h2><p>Decks live in <code>'+esc(root)+'</code>. Ask Claude to start one (<code>/slides</code>); it will appear here.</p>';
+}
+function openDeck(k){
+  key=k;history.replaceState(null,'','#deck='+encodeURIComponent(k));
+  return refreshState(true);
+}
+function refreshState(reloadFrames){
+  return api(D('state')).then(function(s){
+    var slideChanged=!st||JSON.stringify(st.slides.map(function(x){return x.id;}))!==JSON.stringify(s.slides.map(function(x){return x.id;}));
+    st=s;lastStamp=s.stamp;
+    if(curId){var k=s.slides.findIndex(function(x){return x.id===curId;});cur=k>=0?k:Math.min(cur,s.slides.length-1);}else cur=0;
+    curId=s.slides[cur]&&s.slides[cur].id;
+    fill($('#themeSel'),themesList.map(function(t){return [t.slug,t.name];}),s.theme);
+    fill($('#transSel'),TRANS,s.trans);
+    $('#logoCk').checked=s.logo;$('#ribbonCk').checked=s.ribbon;
+    document.title=s.title+' · Deck Studio';
+    if(reloadFrames||slideChanged){renderList(true);loadFrame();}else{renderList(false);}
+    renderSide();
+  });
+}
+
+/* ---------- slide list ---------- */
+function openOf(id){var a=(st.notes.slides[id]||[]);return {open:a.filter(function(n){return n.status==='open';}).length,q:a.filter(function(n){return n.status==='question';}).length};}
+function renderList(frames){
+  var L=$('#list'),v='?v='+Date.now();
+  if(frames){
+    L.innerHTML=st.slides.map(function(s,k){
+      return '<button class="th" data-k="'+k+'"><div class="box"><iframe loading="lazy" tabindex="-1" src="'+deckUrl()+v+'#'+(k+1)+',bare"></iframe></div><div class="n"></div></button>';
+    }).join('');
+    L.querySelectorAll('.th').forEach(function(b){b.onclick=function(){go(+b.dataset.k);};});
+  }
+  L.querySelectorAll('.th').forEach(function(b,k){
+    var s=st.slides[k],o=openOf(s.id);
+    b.classList.toggle('on',k===cur);
+    b.querySelector('.n').innerHTML=(k+1)+(s.trans?' · '+s.trans:'')+(o.open?' <span class="badge">'+o.open+'</span>':'')+(o.q?' <span class="badge q">?</span>':'')+(st.notes.prompts[s.id]&&st.notes.prompts[s.id].status!=='done'?' <span title="Image wanted">🖼</span>':'');
+  });
+  var on=L.querySelector('.th.on');if(on&&frames===false)on.scrollIntoView({block:'nearest'});
+}
+
+/* ---------- preview ---------- */
+var frame=$('#frame'),at={i:0,frag:0,frags:0};
+function loadFrame(){frame.src=deckUrl()+'?v='+Date.now()+'#'+(cur+1)+',bare';}
+function send(m){try{frame.contentWindow.postMessage(m,'*');}catch(e){}}
+function go(k,start){if(editing)return toast('Save or cancel your edit first');cur=Math.max(0,Math.min(st.slides.length-1,k));curId=st.slides[cur].id;send({deck:'goto',i:cur,start:!!start});renderList(false);renderSide();}
+addEventListener('message',function(e){var d=e.data||{};if(d.deck!=='at'||e.source!==frame.contentWindow)return;
+  at=d;var changed=d.i!==cur;cur=d.i;curId=d.id;
+  $('#pos').textContent='Slide '+(d.i+1)+' of '+d.n+(d.frags?' · build '+d.frag+'/'+d.frags:'');
+  fill($('#slideTrans'),[['','Deck default ('+st.trans+')']].concat(TRANS),(st.slides[cur]||{}).trans||'');
+  if(changed){renderList(false);renderSide();}
+});
+$('#prev').onclick=function(){send({deck:'prev'});};
+$('#next').onclick=function(){send({deck:'next'});};
+addEventListener('keydown',function(e){
+  var t=e.target;if(t&&(t.tagName==='TEXTAREA'||t.tagName==='INPUT'||t.tagName==='SELECT'))return;
+  if(editing)return;
+  if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();send({deck:'next'});}
+  else if(e.key==='ArrowLeft'){e.preventDefault();send({deck:'prev'});}
+  else if(e.key==='ArrowDown'){e.preventDefault();go(cur+1);}else if(e.key==='ArrowUp'){e.preventDefault();go(cur-1);}
+});
+$('#present').onclick=function(){window.open(deckUrl()+'#'+(cur+1)+',start','_blank');};
+
+/* ---------- deck-wide settings ---------- */
+$('#deckSel').onchange=function(){if(editing)stopEdit();curId=null;openDeck(this.value);};
+$('#themeSel').onchange=function(){post(D('theme'),{slug:this.value}).then(function(){toast('Theme changed');return refreshState(true);}).catch(err);};
+$('#transSel').onchange=function(){post(D('body'),{trans:this.value}).then(function(){return refreshState(true);}).catch(err);};
+$('#logoCk').onchange=function(){post(D('body'),{logo:this.checked}).then(function(){return refreshState(true);}).catch(err);};
+$('#ribbonCk').onchange=function(){post(D('body'),{ribbon:this.checked}).then(function(){return refreshState(true);}).catch(err);};
+$('#slideTrans').onchange=function(){var v=this.value;withSource(function(sec){if(v)sec.setAttribute('data-trans',v);else sec.removeAttribute('data-trans');}).then(function(){toast('Transition saved');});};
+function err(e){toast('⚠ '+e.message,5000);}
+
+/* Edits go to the deck's source, never the live DOM (the engine adds ribbons, logos, chart internals).
+   Fetch deck.html, parse it, change the one section, send that section back. */
+function withSource(fn){
+  var id=curId;
+  return fetch(deckUrl()+'?raw='+Date.now(),{cache:'no-store'}).then(function(r){return r.text();}).then(function(src){
+    var doc=new DOMParser().parseFromString(src,'text/html');
+    var sec=doc.querySelector('section[data-id="'+id+'"]');if(!sec)throw new Error('slide not found in deck.html');
+    fn(sec);
+    return post(D('section'),{id:id,html:sec.outerHTML});
+  }).then(function(s){st=s;lastStamp=s.stamp;renderList(true);loadFrame();renderSide();}).catch(err);
+}
+
+/* ---------- edit mode ---------- */
+var EXCL='.ribbon,.deck-logo,aside.notes,script,style,canvas,#qr';
+function liveSlide(){var d=frame.contentDocument;return d&&d.querySelector('section.slide[data-id="'+curId+'"]');}
+function leaves(sec){
+  var out=[];
+  (function walk(el){
+    [].forEach.call(el.children,function(c){
+      if(c.matches(EXCL))return;
+      var direct=[].some.call(c.childNodes,function(n){return n.nodeType===3&&n.textContent.trim();});
+      if(direct)out.push(c);else walk(c);
+    });
+  })(sec);
+  return out;
+}
+function pathOf(el,sec){var p=[];while(el&&el!==sec){p.unshift([].indexOf.call(el.parentNode.children,el));el=el.parentNode;}return p;}
+function byPath(sec,p){var el=sec;p.forEach(function(k){el=el&&el.children[k];});return el;}
+function startEdit(){
+  var sec=liveSlide();if(!sec)return;
+  send({deck:'goto',id:curId,start:false});
+  editing={sec:sec,dirty:new Set(),builds:new Map(),sel:null,stamp:lastStamp.deck};
+  document.body.classList.add('editing');$('#editBtn').disabled=true;
+  var doc=frame.contentDocument,css=doc.createElement('style');css.id='studio-edit';
+  css.textContent='[contenteditable]{outline:1px dashed rgba(0,148,179,.55);outline-offset:4px;cursor:text}[contenteditable]:focus{outline:2px solid #0094B3}.studio-sel{outline:3px solid #FF6D22!important;outline-offset:6px}.frag{visibility:visible!important;opacity:1!important}';
+  doc.head.appendChild(css);
+  leaves(sec).forEach(function(el){
+    el.contentEditable='true';el.spellcheck=true;
+    el.addEventListener('input',function(){editing.dirty.add(JSON.stringify(pathOf(el,sec)));});
+    el.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();}if(e.key==='Escape'){stopEdit();}});
+  });
+  sec.addEventListener('click',onPick,true);
+}
+function onPick(e){var el=e.target;if(!editing||el===editing.sec||el.closest(EXCL))return;select(el.closest('[contenteditable]')||el);}
+function select(el){
+  if(editing.sel)editing.sel.classList.remove('studio-sel');
+  editing.sel=el;el.classList.add('studio-sel');
+  var p=JSON.stringify(pathOf(el,editing.sec)),b=editing.builds.has(p)?editing.builds.get(p):buildOf(el);
+  $('#buildSel').disabled=false;$('#buildSel').value=b;
+  $('#edHint').textContent='Selected: “'+(el.textContent.trim().slice(0,40)||el.tagName.toLowerCase())+'”';
+}
+function buildOf(el){var c=el.classList;if(c.contains('frag')){var v=['fade','zoom','wipe','tint','strike'].filter(function(x){return c.contains(x);})[0];return v?'frag '+v:'frag';}return c.contains('rise')?'rise':'';}
+$('#wider').onclick=function(){if(editing&&editing.sel&&editing.sel.parentNode!==editing.sec)select(editing.sel.parentNode);};
+$('#buildSel').onchange=function(){if(editing&&editing.sel)editing.builds.set(JSON.stringify(pathOf(editing.sel,editing.sec)),this.value);};
+$('#editBtn').onclick=startEdit;
+$('#edCancel').onclick=function(){stopEdit();loadFrame();};
+$('#edSave').onclick=function(){
+  var E=editing;if(!E)return;
+  if(lastStamp.deck!==E.stamp&&!confirmChanged())return;
+  withSource(function(psec){
+    E.dirty.forEach(function(p){
+      var live=byPath(E.sec,JSON.parse(p)),dst=byPath(psec,JSON.parse(p));if(!live||!dst)return;
+      var c=live.cloneNode(true);
+      c.querySelectorAll('*').forEach(function(x){x.removeAttribute('contenteditable');x.removeAttribute('spellcheck');x.classList.remove('shown','studio-sel');if(!x.classList.length)x.removeAttribute('class');});
+      dst.innerHTML=c.innerHTML.replace(/&nbsp;/g,' ');
+    });
+    E.builds.forEach(function(v,p){
+      var dst=byPath(psec,JSON.parse(p));if(!dst)return;
+      BUILD.forEach(function(c){dst.classList.remove(c);});
+      v.split(' ').filter(Boolean).forEach(function(c){dst.classList.add(c);});
+      if(!dst.classList.length)dst.removeAttribute('class');
+    });
+  }).then(function(){toast('Saved to deck.html');});
+  stopEdit();
+};
+function confirmChanged(){toast('Claude changed this deck while you were editing. Cancel and edit again.',5000);return false;}
+function stopEdit(){editing=null;document.body.classList.remove('editing');$('#editBtn').disabled=false;$('#buildSel').disabled=true;$('#edHint').textContent='Click any text to change it. Select a block to set how it appears.';
+  var doc=frame.contentDocument;if(doc){var c=doc.getElementById('studio-edit');if(c)c.remove();doc.querySelectorAll('[contenteditable]').forEach(function(x){x.removeAttribute('contenteditable');});doc.querySelectorAll('.studio-sel').forEach(function(x){x.classList.remove('studio-sel');});}}
+
+/* ---------- notes ---------- */
+$('#tabSlide').onclick=function(){tab='slide';renderSide();};
+$('#tabDeck').onclick=function(){tab='deck';renderSide();};
+function scope(){return tab==='deck'?'deck':curId;}
+function renderSide(){
+  if(!st)return;
+  var s=st.slides[cur]||{},n=st.notes,list=tab==='deck'?n.deck:(n.slides[curId]||[]);
+  var dOpen=n.deck.filter(function(x){return x.status==='open';}).length;
+  $('#tabSlide').classList.toggle('on',tab==='slide');$('#tabDeck').classList.toggle('on',tab==='deck');
+  $('#tabSlide').textContent='Slide '+(cur+1);
+  $('#tabDeck').innerHTML='Whole deck'+(dOpen?' <span class="badge">'+dOpen+'</span>':'');
+  var h='';
+  if(tab==='deck'&&n.style)h+='<div class="prompt"><h4>Image style for this deck</h4><pre>'+esc(n.style)+'</pre></div>';
+  var pr=tab==='slide'&&n.prompts[curId];
+  if(pr&&pr.prompt){
+    h+='<div class="prompt"><h4>Image wanted'+(pr.status==='done'?' · supplied':'')+'</h4><pre>'+esc(pr.prompt)+'</pre>'+
+      '<button data-copy="1">Copy prompt</button> <span style="color:var(--mut);font-size:13px">then drop the image on the slide</span>'+
+      (pr.image?'<div class="refs"><img src="/d/'+encodeURIComponent(key)+'/'+esc(pr.image)+'"></div>':'')+'</div>';
+  }
+  if(!list.length)h+='<div class="empty">'+(tab==='deck'?'Notes here apply to the whole deck: tone, pace, look, what to cut.':'No notes on this slide yet.')+'</div>';
+  list.forEach(function(x){
+    h+='<div class="card '+x.status+'" data-id="'+x.id+'"><div class="t">'+esc(x.text)+'</div>'+refsHtml(x.refs)+
+      (x.reply?'<div class="reply"><b>'+(x.status==='question'?'Claude asks: ':'Claude: ')+'</b>'+esc(x.reply)+'</div>':'')+
+      (x.status==='question'?'<div class="answer"><textarea placeholder="Your answer"></textarea><button data-ans="1">Answer</button></div>':'')+
+      '<div class="meta"><span class="chip '+x.status+'">'+({open:'to do',applied:'done',question:'question'}[x.status]||x.status)+'</span><span class="sp"></span>'+
+      (x.status==='applied'?'<button class="ghost" data-re="1">Reopen</button>':'')+
+      (x.status==='open'?'<button class="ghost" data-ed="1">Edit</button>':'')+
+      '<button class="ghost" data-del="1">Delete</button></div></div>';
+  });
+  if(tab==='slide'&&s.speaker)h+='<details class="speaker"><summary>Speaker notes</summary><div>'+esc(s.speaker)+'</div></details>';
+  $('#notes').innerHTML=h;
+  $('#txt').placeholder=tab==='deck'?'Direction for the whole deck…  (⌘↩ to add)':'What should change on this slide? Words, look, layout, an animation, a graphic…  (⌘↩ to add)';
+  var total=st.slides.reduce(function(a,x){return a+openOf(x.id).open;},0)+dOpen;
+  $('#foot').textContent=total?total+' note'+(total>1?'s':'')+' to do. Tell Claude “apply the notes”.':'Nothing waiting for Claude.';
+  wireCards();
+}
+function refsHtml(r){if(!r||!r.length)return '';return '<div class="refs">'+r.map(function(p){var u='/d/'+encodeURIComponent(key)+'/'+p;return /\.(png|jpe?g|gif|webp|avif|svg)$/i.test(p)?'<img src="'+esc(u)+'" alt="">':'<a class="file" target="_blank" href="'+esc(u)+'">'+esc(p.split('/').pop())+'</a>';}).join('')+'</div>';}
+function wireCards(){
+  var N=$('#notes');
+  N.querySelectorAll('.refs img').forEach(function(i){i.onclick=function(){$('#zoom img').src=i.src;$('#zoom').classList.add('open');};});
+  var cp=N.querySelector('[data-copy]');if(cp)cp.onclick=function(){navigator.clipboard.writeText(st.notes.prompts[curId].prompt).then(function(){toast('Prompt copied. Paste it into Midjourney.');});};
+  N.querySelectorAll('.card').forEach(function(c){
+    var id=c.dataset.id,b=function(s){return c.querySelector(s);};
+    if(b('[data-del]'))b('[data-del]').onclick=function(){notesOp({op:'delete',id:id});};
+    if(b('[data-re]'))b('[data-re]').onclick=function(){notesOp({op:'update',id:id,fields:{status:'open'}});};
+    if(b('[data-ed]'))b('[data-ed]').onclick=function(){
+      var t=b('.t'),ta=document.createElement('textarea');ta.value=t.textContent;ta.style.cssText='width:100%;min-height:80px;border:1px solid var(--line);border-radius:7px;padding:6px 8px;background:var(--bg)';
+      t.replaceWith(ta);ta.focus();this.textContent='Save';this.onclick=function(){notesOp({op:'update',id:id,fields:{text:ta.value.trim()}});};};
+    if(b('[data-ans]'))b('[data-ans]').onclick=function(){
+      var a=b('.answer textarea').value.trim();if(!a)return;
+      var x=findNote(id);notesOp({op:'update',id:id,fields:{text:x.text+'\n\n'+'Q: '+x.reply+'\nA: '+a,reply:'',status:'open'}});};
+  });
+}
+function findNote(id){var l=tab==='deck'?st.notes.deck:(st.notes.slides[curId]||[]);return l.filter(function(x){return x.id===id;})[0];}
+function notesOp(o){o.scope=o.scope||scope();return post(D('notes'),o).then(function(n){st.notes=n;renderList(false);renderSide();}).catch(err);}
+$('#add').onclick=addNote;
+$('#txt').addEventListener('keydown',function(e){if(e.key==='Enter'&&(e.metaKey||e.ctrlKey)){e.preventDefault();addNote();}});
+function addNote(){
+  var t=$('#txt').value.trim();if(!t&&!pending.length)return;
+  notesOp({op:'add',text:t||'See the attached reference.',refs:pending.slice()}).then(function(){$('#txt').value='';pending=[];renderAtt();});
+}
+
+/* ---------- uploads: reference images on notes, and images dropped on the slide ---------- */
+function upload(file,kind){return fetch(D('upload')+'?kind='+kind+'&name='+encodeURIComponent(file.name||'pasted.png'),{method:'POST',body:file}).then(function(r){return r.json();}).then(function(j){if(j.error)throw new Error(j.error);return j.path;});}
+function attach(files){[].forEach.call(files,function(f){upload(f,'refs').then(function(p){pending.push(p);renderAtt();}).catch(err);});}
+function renderAtt(){$('#att').innerHTML=pending.map(function(p,k){return '<span>'+(/\.(png|jpe?g|gif|webp|avif)$/i.test(p)?'<img src="/d/'+encodeURIComponent(key)+'/'+esc(p)+'">':esc(p.split('/').pop()))+'<button class="ghost" data-k="'+k+'">✕</button></span>';}).join('');
+  $('#att').querySelectorAll('button').forEach(function(b){b.onclick=function(){pending.splice(+b.dataset.k,1);renderAtt();};});}
+$('#attBtn').onclick=function(){$('#file').click();};
+$('#file').onchange=function(){attach(this.files);this.value='';};
+$('#txt').addEventListener('paste',function(e){var f=[].filter.call(e.clipboardData.files||[],function(x){return /^image\//.test(x.type);});if(f.length){e.preventDefault();attach(f);}});
+$('#compose').addEventListener('dragover',function(e){e.preventDefault();});
+$('#compose').addEventListener('drop',function(e){e.preventDefault();e.stopPropagation();document.body.classList.remove('dragging');attach(e.dataTransfer.files);});
+var dragN=0;
+addEventListener('dragenter',function(e){if(e.dataTransfer&&[].indexOf.call(e.dataTransfer.types,'Files')>=0){dragN++;document.body.classList.add('dragging');}});
+addEventListener('dragleave',function(){if(--dragN<=0){dragN=0;document.body.classList.remove('dragging');}});
+addEventListener('dragover',function(e){e.preventDefault();});
+addEventListener('drop',function(e){e.preventDefault();dragN=0;document.body.classList.remove('dragging');});
+$('#drop').addEventListener('drop',function(e){
+  e.preventDefault();e.stopPropagation();dragN=0;document.body.classList.remove('dragging');
+  var f=[].filter.call(e.dataTransfer.files,function(x){return /^image\//.test(x.type);})[0];if(!f)return;
+  var id=curId;
+  upload(f,'images').then(function(p){
+    var pr=st.notes.prompts[id];
+    var done=pr?post(D('notes'),{op:'prompt',scope:id,fields:{status:'done',image:p}}):Promise.resolve();
+    return done.then(function(){return post(D('notes'),{op:'add',scope:id,text:'Use this image on the slide.',refs:[p]});});
+  }).then(function(n){st.notes=n;tab='slide';renderList(false);renderSide();toast('Image added. Claude will place it when you say “apply the notes”.',3500);}).catch(err);
+});
+$('#zoom').onclick=function(){this.classList.remove('open');};
+
+/* ---------- save final / share ---------- */
+function pop(btn,p){btn.onclick=function(e){e.stopPropagation();document.querySelectorAll('.pop').forEach(function(x){if(x!==p)x.classList.remove('open');});p.classList.toggle('open');if(p.id==='pubPop'&&p.classList.contains('open'))listPub();};p.onclick=function(e){e.stopPropagation();};}
+pop($('#expBtn'),$('#expPop'));pop($('#pubBtn'),$('#pubPop'));
+document.addEventListener('click',function(){document.querySelectorAll('.pop').forEach(function(x){x.classList.remove('open');});});
+$('#expPop').querySelectorAll('[data-f]').forEach(function(b){b.onclick=function(){
+  var out=$('#expOut'),bs=$('#expPop').querySelectorAll('button');bs.forEach(function(x){x.disabled=true;});out.textContent='Saving… (the Google Slides file takes a little longer)';
+  post(D('export'),{formats:b.dataset.f.split(',')}).then(function(j){
+    out.innerHTML='Saved:<br>'+j.paths.map(function(p){return '<a href="#" data-p="'+esc(p)+'">'+esc(p.split('/').pop())+'</a>';}).join('<br>')+'<br><span>Click a name to show it in the folder.</span>';
+    out.querySelectorAll('a').forEach(function(a){a.onclick=function(e){e.preventDefault();post('/api/reveal',{path:a.dataset.p});};});
+  }).catch(function(e){out.textContent='⚠ '+e.message;}).then(function(){bs.forEach(function(x){x.disabled=false;});});
+};});
+$('#pubGo').onclick=function(){
+  var b=this;b.disabled=true;$('#pubOut').textContent='Publishing…';
+  post(D('publish'),{expiry:$('#expiry').value}).then(function(j){
+    $('#pubOut').innerHTML='<a href="'+esc(j.url)+'" target="_blank">'+esc(j.url)+'</a><br>Copied. GitHub Pages takes a minute or two to serve it.';
+    navigator.clipboard.writeText(j.url).catch(function(){});listPub();
+  }).catch(function(e){$('#pubOut').textContent='⚠ '+e.message;}).then(function(){b.disabled=false;});
+};
+function listPub(){
+  $('#pubList').textContent='…';
+  api('/api/published').then(function(l){
+    if(!l.length){$('#pubList').textContent='None.';return;}
+    $('#pubList').innerHTML=l.map(function(p){return '<div class="pub"><a href="'+esc(p.url)+'" target="_blank">'+esc(p.name)+'</a><span>'+esc(p.expires)+'</span><button class="ghost" data-n="'+esc(p.name)+'">Revoke</button></div>';}).join('');
+    $('#pubList').querySelectorAll('[data-n]').forEach(function(b){b.onclick=function(){post('/api/revoke',{name:b.dataset.n}).then(listPub).catch(err);};});
+  }).catch(function(e){$('#pubList').textContent='⚠ '+e.message;});
+}
+
+/* ---------- live reload: Claude edits deck.html / notes.json on disk ---------- */
+setInterval(function(){
+  if(!key||document.hidden)return;
+  api(D('stamp')).then(function(s){
+    if(!lastStamp)return;
+    if(s.deck!==lastStamp.deck&&!editing){toast('Deck updated');refreshState(true);}
+    else if(s.notes!==lastStamp.notes){lastStamp.notes=s.notes;api(D('state')).then(function(x){st.notes=x.notes;lastStamp.notes=x.stamp.notes;renderList(false);renderSide();});}
+  }).catch(function(){});
+},1500);
+
+api('/api/themes').then(function(t){themesList=t;return loadDecks();}).catch(err);
+})();
+</script>
+</body>
+</html>

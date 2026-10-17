@@ -7,6 +7,12 @@
   deck themes                                  list themes
   deck gallery                                 rebuild gallery/ (every theme on the same sample slides)
   deck shots <dir|deck.html> [--out D]         screenshot every slide (fully built) for visual QA
+  deck studio [<dir>]                          start the review studio (127.0.0.1:4646) and open it
+  deck notes <dir> [--all]                     print the notes waiting for Claude, with slide numbers
+  deck resolve <dir> <note-id> "<reply>" [--question]   mark a note applied (or ask a question back)
+  deck prompt <dir> <slide-id> "<prompt>"      attach an image prompt (Midjourney) to a slide
+  deck export <dir> [--formats html,pdf,pptx] [--dest D]   save the final version (default ~/Documents/speaking)
+  deck publish <dir> [--expiry 72]             publish a share link on exmachina.in/deck-studio
 
 A deck is one self-contained deck.html. The engine and theme sit inside it between markers, so
 `refresh` can upgrade old decks without touching their slides.
@@ -244,6 +250,100 @@ Pick the ones to keep, and tell me what to change in any of them.</p>
     print(os.path.join(out, 'index.html'))
 
 
+# ---------- notes (the studio writes them, Claude applies them) ----------
+
+DECKS = os.path.expanduser(os.environ.get('DECKS', '~/coding/decks'))
+PORT = int(os.environ.get('DECK_PORT', 4646))
+
+
+def notes_path(d):
+    return os.path.join(os.path.dirname(deck_path(d)), 'notes.json')
+
+
+def load_notes(d):
+    try:
+        n = json.load(open(notes_path(d)))
+    except (FileNotFoundError, ValueError):
+        n = {}
+    for k, v in (('deck', []), ('slides', {}), ('prompts', {})):
+        n.setdefault(k, v)
+    return n
+
+
+def save_notes(d, n):
+    p = notes_path(d)
+    json.dump(n, open(p + '.tmp', 'w'), indent=2, ensure_ascii=False)
+    os.replace(p + '.tmp', p)
+
+
+def slide_ids(d):
+    return re.findall(r'<section\b[^>]*\bdata-id="([^"]+)"', open(deck_path(d)).read())
+
+
+def notes(d, everything=False):
+    n, ids = load_notes(d), slide_ids(d)
+    want = lambda x: everything or x.get('status') == 'open'
+    show = lambda x: (f'  [{x["id"]}] ({x["status"]}) ' + x['text'].replace('\n', '\n      ')
+                      + ''.join(f'\n      ref: {r}' for r in x.get('refs', []))
+                      + (f'\n      reply: {x["reply"]}' if everything and x.get('reply') else ''))
+    out = []
+    dk = [x for x in n['deck'] if want(x)]
+    if dk:
+        out.append('WHOLE DECK\n' + '\n'.join(map(show, dk)))
+    for sid, lst in sorted(n['slides'].items(), key=lambda kv: ids.index(kv[0]) if kv[0] in ids else 999):
+        lst = [x for x in lst if want(x)]
+        if lst:
+            where = f'slide {ids.index(sid) + 1}' if sid in ids else 'slide (deleted)'
+            out.append(f'{where.upper()}  data-id="{sid}"\n' + '\n'.join(map(show, lst)))
+    print('\n\n'.join(out) or 'No open notes.')
+
+
+def resolve(d, nid, reply, question=False):
+    n = load_notes(d)
+    for x in n['deck'] + [y for v in n['slides'].values() for y in v]:
+        if x['id'] == nid:
+            x.update(status='question' if question else 'applied', reply=reply)
+            save_notes(d, n)
+            return
+    sys.exit(f'no note {nid}')
+
+
+def prompt(d, sid, text):
+    n = load_notes(d)
+    n['prompts'][sid] = {'prompt': text, 'status': 'wanted'}
+    save_notes(d, n)
+
+
+def studio(d=None):
+    import urllib.request
+    url = f'http://127.0.0.1:{PORT}/'
+    try:
+        urllib.request.urlopen(url + 'api/themes', timeout=1)
+    except OSError:
+        log = os.path.join(tempfile.gettempdir(), 'deck-studio.log')
+        subprocess.Popen([sys.executable, os.path.join(ROOT, 'studio', 'serve.py'), '--port', str(PORT)],
+                         stdout=open(log, 'a'), stderr=subprocess.STDOUT, start_new_session=True)
+        import time
+        for _ in range(30):
+            time.sleep(.2)
+            try:
+                urllib.request.urlopen(url + 'api/themes', timeout=1); break
+            except OSError:
+                pass
+    if d:
+        rel = os.path.relpath(os.path.abspath(os.path.dirname(deck_path(d))), os.path.realpath(DECKS))
+        url += '#deck=' + rel.replace(os.sep, '~')
+    opener = 'open' if sys.platform == 'darwin' else 'xdg-open'
+    subprocess.Popen([opener, url], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    print(url)
+
+
+def exporter():
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import export
+    return export
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sp = ap.add_subparsers(dest='cmd', required=True)
@@ -252,6 +352,12 @@ def main():
     a = sp.add_parser('theme'); a.add_argument('path'); a.add_argument('slug')
     sp.add_parser('themes'); sp.add_parser('gallery')
     a = sp.add_parser('shots'); a.add_argument('path'); a.add_argument('--out')
+    a = sp.add_parser('studio'); a.add_argument('path', nargs='?')
+    a = sp.add_parser('notes'); a.add_argument('path'); a.add_argument('--all', action='store_true')
+    a = sp.add_parser('resolve'); a.add_argument('path'); a.add_argument('id'); a.add_argument('reply'); a.add_argument('--question', action='store_true')
+    a = sp.add_parser('prompt'); a.add_argument('path'); a.add_argument('slide'); a.add_argument('text')
+    a = sp.add_parser('export'); a.add_argument('path'); a.add_argument('--formats', default='html,pdf,pptx'); a.add_argument('--dest')
+    a = sp.add_parser('publish'); a.add_argument('path'); a.add_argument('--expiry', default='72')
     x = ap.parse_args()
     if x.cmd == 'new': new(x.dir, x.theme, x.title)
     elif x.cmd == 'refresh': print(refresh(x.path))
@@ -260,6 +366,13 @@ def main():
         for t in themes(): print(f'{t["slug"]:12} {t["name"]:16} {t["about"]}')
     elif x.cmd == 'gallery': gallery()
     elif x.cmd == 'shots': shots(x.path, x.out)
+    elif x.cmd == 'studio': studio(x.path)
+    elif x.cmd == 'notes': notes(x.path, x.all)
+    elif x.cmd == 'resolve': resolve(x.path, x.id, x.reply, x.question)
+    elif x.cmd == 'prompt': prompt(x.path, x.slide, x.text)
+    elif x.cmd == 'export':
+        for p in exporter().export(os.path.dirname(os.path.abspath(deck_path(x.path))), x.formats.split(','), x.dest): print(p)
+    elif x.cmd == 'publish': print(exporter().publish(os.path.dirname(os.path.abspath(deck_path(x.path))), x.expiry))
 
 
 if __name__ == '__main__':

@@ -1,7 +1,7 @@
 /* ===== DECK ENGINE JS — shared by every deck; edit here, then `deck refresh <deck>`. =====
    Keys: → / space next build or slide · ← back · F fullscreen · H counter · Home / End.
    Hash: #N opens slide N fully built · #N,start opens it unbuilt · ,bare hides the counter.
-   Per-slide transition: <section class="slide" data-trans="dip">; deck default on <body data-trans>.
+   Per-slide transition: a data-trans attribute on the slide section; the deck default sits on body.
    Transitions: fade (default) · cut · dip (through the background) · slide · push · zoom · rise. */
 (function(){
   var LOGO='__LOGO__';

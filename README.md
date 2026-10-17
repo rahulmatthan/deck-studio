@@ -1,65 +1,68 @@
 # Deck Studio
 
-A single-file, self-contained web app for building 16:9 HTML slide decks in Rahul's house styles,
-hosted on GitHub Pages so it's usable from any machine. Decks save straight to your Mac
-(`~/Documents/speaking`), and can optionally be published as shareable links with a timed expiry.
+The engine, themes and review studio behind Rahul's presentations. Claude builds the decks
+(the `/slides` skill); Rahul reviews them here, leaving notes beside each slide, and Claude
+applies them. Decks themselves live in the private [decks](https://github.com/rahulmatthan/decks)
+repo (`~/coding/decks`).
 
-- **Studio:** https://exmachina.in/deck-studio/
-- **Published decks:** `https://exmachina.in/deck-studio/d/<id>.<expiry>.html`
-
-## One-time setup
-
-### 1. Create the repo and push
-```bash
-cd ~/Coding/deck-studio
-git init -b main
-git add -A
-git commit -m "Deck Studio + publish"
-
-# with the GitHub CLI:
-gh repo create deck-studio --public --source=. --remote=origin --push
-
-# …or, if you made the empty repo on github.com first:
-# git remote add origin https://github.com/rahulmatthan/deck-studio.git
-# git push -u origin main
+```
+engine/engine.css, engine.js   the shared deck engine (inlined into every deck)
+engine/themes/*.css, ORDER     twelve themes, all with the Trilegal ribbon
+tools/deck.py                  the `deck` CLI
+tools/export.py                final versions (HTML, PDF, .pptx) and share links
+studio/serve.py, index.html    the local review studio (http://127.0.0.1:4646)
+gallery/                       every theme on the same sample slides (`deck gallery`)
+d/                             published share links (served by GitHub Pages)
+index.html                     the old in-browser deck builder (still live at exmachina.in/deck-studio)
 ```
 
-### 2. Turn on GitHub Pages
-Repo → **Settings → Pages** → *Build and deployment* → Source: **Deploy from a branch** →
-Branch: **main**, folder **/(root)** → Save. Give it a minute; Studio appears at
-`https://exmachina.in/deck-studio/`.
+## The `deck` command
 
-### 3. Make a fine-grained token (only needed to *publish* links)
-github.com → **Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate**:
-- **Resource owner:** rahulmatthan
-- **Repository access:** *Only select repositories* → **deck-studio**
-- **Permissions → Repository → Contents:** **Read and write**
-- Generate, copy the `github_pat_…` string.
+`~/.local/bin/deck` runs `tools/deck.py` (from `~/dotfiles/local-bin/deck`).
 
-In Studio: **Share → paste the token → Connect**. It's stored only in that browser
-(localStorage). Use *Forget token* to remove it; revoke it anytime on GitHub.
+```
+deck new <dir> --theme <slug> --title "…"   start a deck folder
+deck studio [<dir>]                         open the review studio
+deck notes <dir>                            the notes waiting for Claude
+deck resolve <dir> <id> "<reply>" [--question]
+deck prompt <dir> <slide-id> "<prompt>"     an image prompt for Midjourney, shown in the studio
+deck theme <dir> <slug> · deck refresh <dir> · deck themes · deck gallery · deck shots <dir>
+deck export <dir> [--formats html,pdf,pptx] save to ~/Documents/speaking
+deck publish <dir> [--expiry 72]            share link at exmachina.in/deck-studio/d/…
+```
 
-## Using it
+## A deck
 
-- **Build on the go:** open the Studio URL anywhere, *New* or *Open* a deck, edit.
-- **Save locally:** *Save both* writes `<name>.html` (editable master) + `<name> (shareable).html`
-  (present-only) into a folder you pick once (`~/Documents/speaking`). Chrome/Edge only.
-- **Publish a link:** *Share → pick an expiry → Publish*. Commits a present-only copy to `d/`,
-  gives you a public link to send the technician.
-- **Revoke:** *Share → Published links → Revoke* deletes it immediately.
-- **Present:** press **F** for fullscreen — the screen stays awake (Wake Lock) until you exit.
+One self-contained `deck.html`. The fonts link, engine CSS, theme CSS and engine JS sit inside it
+between markers (`<!--deck:fonts-->`, `style#deck-engine`, `style#deck-theme`, `script#deck-js`),
+so `deck refresh` upgrades an old deck to the current engine without touching its slides.
+Deck-specific CSS goes in `style#deck-local`. Every slide carries a stable `data-id`; notes in
+`notes.json` are keyed on it.
 
-## How expiry works
+Keys when presenting: → / space next build or slide, ← back, F fullscreen (keeps the screen
+awake), H shows the counter. `#N` opens slide N fully built, `#N,start` unbuilt.
 
-Each published file is named `<id>.<expiryEpochMs>.html` (or `<id>.x.html` for no expiry).
-- A soft in-page gate shows "link expired" the moment the deadline passes.
-- The hourly **`cleanup` GitHub Action** actually deletes expired files from the repo, so the
-  link truly 404s. (Run it manually anytime from the Actions tab.)
+## The studio
 
-**Note on "single-use":** a strict open-once link can't be enforced on static hosting (nothing runs
-when someone views a static file). Timed-expiry + Revoke covers keeping viewers out after a talk.
-True single-use would need a tiny serverless function — not included here.
+`deck studio` starts a small Python server (standard library only, bound to 127.0.0.1) and opens
+it. Left: the slides. Centre: the slide, with arrows to step through builds, the slide's
+transition, and **Edit slide** to change words directly or set what appears on a click. Right:
+notes for this slide or for the whole deck, with reference images (attach, paste or drop).
+Claude's replies and questions appear on the notes; the page reloads when Claude changes the
+deck. Drop an image on the slide to have Claude place it. **Save final** writes HTML, PDF and
+.pptx to `~/Documents/speaking`; **Share link** publishes an expiring copy.
 
-## Notes
-- `.nojekyll` keeps GitHub Pages from processing files through Jekyll.
-- Everything is static; no build step.
+## Share links
+
+Published files are `d/<id>.<expiryEpochMs|x>.html`, committed with `gh`. A soft in-page gate
+shows "link expired" after the deadline, and the hourly `cleanup` GitHub Action deletes expired
+files. The repo is public: anything published here can be read on GitHub until it expires.
+
+## On the other machine
+
+```
+gh repo clone rahulmatthan/deck-studio ~/coding/deck-studio
+gh repo clone rahulmatthan/decks ~/coding/decks
+ln -s ~/coding/dotfiles/local-bin/deck ~/.local/bin/deck
+```
+Exports need Chrome or Chromium, and `uv` for the .pptx step.
