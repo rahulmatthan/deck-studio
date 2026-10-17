@@ -1,0 +1,8 @@
+/* @name Signal
+   @fonts https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap
+   @about Tall condensed type with an orange bar. Brisk, newsy. */
+:root{--bg:#FFFFFF;--fg:#121417;--muted:#535963;--accent:#D9480F;--hairline:#E2E4E8;--panel:#F4F5F7;
+  --disp:'Barlow Condensed',sans-serif;--body:'Barlow',sans-serif;--dw:600;--dtrack:-.005em;--dlh:.98;--k:1.32;
+  --ebcase:uppercase;--ebtrack:.06em;--ebc:#D9480F}
+.idea,.divider,.cover-t,.quote{border-left:16px solid var(--accent);padding-left:40px}
+.rule{display:none}

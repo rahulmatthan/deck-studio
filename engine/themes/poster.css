@@ -1,0 +1,10 @@
+/* @name Poster
+   @fonts https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600&display=swap
+   @about Heavy poster capitals; covers and dividers become solid red fields. */
+:root{--bg:#FFFFFF;--fg:#0E0E0E;--muted:#505050;--accent:#AA272F;--hairline:#E2E2E2;--panel:#F3F3F3;
+  --disp:'Anton',sans-serif;--body:'Inter',sans-serif;--dw:400;--dcase:uppercase;--dtrack:.005em;--dlh:1.0;--k:1.22;
+  --ebcase:uppercase;--ebtrack:.06em;--ebc:#AA272F}
+.slide:has(.cover-t),.slide:has(.divider),.slide:has(.part){--bg:#AA272F;--fg:#FFFFFF;--muted:#FFE3E5;--accent:#FFFFFF;--ebc:#FFFFFF;--logo-filter:brightness(0) invert(1)}
+.slide:has(.cover-t) em,.slide:has(.divider) em{color:#0E0E0E}
+.stat{font-family:'Anton',sans-serif}
+.rule{display:none}

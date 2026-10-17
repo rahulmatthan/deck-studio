@@ -1,0 +1,5 @@
+/* @name Paper
+   @fonts https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600&display=swap
+   @about Cool paper-white, Lexend (built for reading ease), deep aqua. */
+:root{--bg:#EEF2F5;--fg:#182B49;--muted:#536174;--accent:#006F88;--hairline:#D3DBE2;--panel:#E2E8ED;
+  --disp:'Lexend',sans-serif;--body:'Lexend',sans-serif;--dw:500;--dtrack:-.025em;--dlh:1.08;--k:.94;--ebc:#006F88}

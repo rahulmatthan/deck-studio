@@ -1,0 +1,5 @@
+/* @name Keynote Minimal
+   @fonts https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap
+   @about White, navy type, Trilegal red. The house default. */
+:root{--bg:#FFFFFF;--fg:#182B49;--muted:#55606E;--accent:#AA272F;--hairline:#E3E7EC;--panel:#F3F5F7;
+  --disp:'Archivo',sans-serif;--body:'Inter',sans-serif;--dw:600;--dtrack:-.015em;--ebc:#AA272F}

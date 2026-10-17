@@ -1,0 +1,6 @@
+/* @name Slate
+   @fonts https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap
+   @about Calm charcoal grey, geometric type, coral-red accent. */
+:root{--bg:#2D3239;--fg:#F3F4F6;--muted:#B3BAC4;--accent:#FF7B83;--hairline:#454C56;--panel:#363C44;
+  --disp:'Outfit',sans-serif;--body:'Outfit',sans-serif;--dw:500;--dtrack:-.02em;--dlh:1.05;
+  --ebc:#FF7B83;--logo-filter:brightness(0) invert(1)}

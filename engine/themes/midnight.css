@@ -1,0 +1,6 @@
+/* @name Midnight
+   @fonts https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap
+   @about Deep Trilegal navy, bright aqua. Authoritative, glare-free. */
+:root{--bg:#0B2238;--fg:#F2F6F9;--muted:#A6B8CA;--accent:#3EC5E4;--hairline:#21405D;--panel:#112C47;
+  --disp:'Plus Jakarta Sans',sans-serif;--body:'Plus Jakarta Sans',sans-serif;--dw:700;--dtrack:-.03em;--dlh:1.04;
+  --ebc:#3EC5E4;--logo-filter:brightness(0) invert(1)}

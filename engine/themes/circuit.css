@@ -1,0 +1,8 @@
+/* @name Circuit
+   @fonts https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap
+   @about Near-black with a faint grid; technical grotesk, aqua signal. */
+:root{--bg:#0D1117;--fg:#E9EEF3;--muted:#9AA6B4;--accent:#36C2E3;--hairline:#232B36;--panel:#141B24;
+  --disp:'Space Grotesk',sans-serif;--body:'Space Grotesk',sans-serif;--dw:500;--dtrack:-.03em;--dlh:1.04;
+  --ebcase:uppercase;--ebtrack:.05em;--ebc:#36C2E3;--logo-filter:brightness(0) invert(1)}
+.slide{background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:40px 40px}
+.slide.bleed{background-image:none}

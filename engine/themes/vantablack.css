@@ -1,0 +1,9 @@
+/* @name VantaBlack
+   @fonts https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600&family=Inter:wght@400;500;600&display=swap
+   @about Pure black stage, white type, one orange spark. Centred. */
+:root{--bg:#000000;--fg:#F5F5F5;--muted:#A3A3A3;--accent:#FF7A33;--hairline:#2A2A2A;--panel:#111111;
+  --disp:'Inter Tight',sans-serif;--body:'Inter',sans-serif;--dw:500;--dtrack:-.035em;--dlh:1.0;--k:1.08;
+  --ebc:#A3A3A3;--logo-filter:brightness(0) invert(1)}
+html,body{background:#000}
+.slide{align-items:center;text-align:center}
+.rule{display:none}

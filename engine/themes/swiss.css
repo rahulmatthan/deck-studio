@@ -1,0 +1,13 @@
+/* @name Swiss
+   @fonts https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap
+   @about International style: top-left grid, black rule, red square. */
+:root{--bg:#FFFFFF;--fg:#000000;--muted:#4A4A4A;--accent:#C8102E;--hairline:#D9D9D9;--panel:#F2F2F2;
+  --disp:'Schibsted Grotesk',sans-serif;--body:'Schibsted Grotesk',sans-serif;--dw:700;--dtrack:-.035em;--dlh:1.0;
+  --ebc:#000000;--pad-y:84px}
+.slide{justify-content:flex-start;padding-top:150px}
+.slide:before{content:'';position:absolute;left:var(--pad-x);right:var(--pad-x);top:84px;height:4px;background:#000}
+.slide.center{justify-content:center;padding-top:var(--pad-y)}
+.slide.bleed:before{display:none}
+.eyebrow{display:flex;align-items:center;gap:14px}
+.eyebrow:before{content:'';width:22px;height:22px;background:var(--accent);flex:none}
+.rule{display:none}

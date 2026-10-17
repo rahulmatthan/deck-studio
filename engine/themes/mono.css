@@ -1,0 +1,10 @@
+/* @name Mono
+   @fonts https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap
+   @about Typewriter austerity. Black on white; emphasis is a black block. */
+:root{--bg:#FFFFFF;--fg:#111111;--muted:#555555;--accent:#AA272F;--hairline:#DDDDDD;--panel:#F2F2F2;
+  --disp:'IBM Plex Mono',monospace;--body:'IBM Plex Sans',sans-serif;--dw:500;--dtrack:-.03em;--dlh:1.12;--k:.86;
+  --ebc:#AA272F}
+em,.em{color:#fff;background:#111;padding:0 .14em;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.cover-t em{display:inline}
+.stat{color:#111}
+.vs .side.b .big,.new{color:#AA272F;background:none;padding:0}

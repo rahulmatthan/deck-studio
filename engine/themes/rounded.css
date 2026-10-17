@@ -1,0 +1,5 @@
+/* @name Rounded
+   @fonts https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap
+   @about Soft rounded type on a pale aqua wash. Warm without the brown. */
+:root{--bg:#EAF5F8;--fg:#12324A;--muted:#4C6577;--accent:#007C97;--hairline:#CFE3EA;--panel:#DDEFF4;
+  --disp:'Nunito',sans-serif;--body:'Nunito',sans-serif;--dw:800;--dtrack:-.02em;--dlh:1.06;--ebc:#007C97}

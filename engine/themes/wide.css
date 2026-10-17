@@ -1,0 +1,6 @@
+/* @name Wide
+   @fonts https://fonts.googleapis.com/css2?family=Unbounded:wght@300;400;500;600&family=Inter:wght@400;500;600&display=swap
+   @about Extended display type, generous space, centred. Modern and confident. */
+:root{--bg:#FFFFFF;--fg:#182B49;--muted:#55606E;--accent:#C2410C;--hairline:#E3E7EC;--panel:#F3F5F7;
+  --disp:'Unbounded',sans-serif;--body:'Inter',sans-serif;--dw:500;--dtrack:-.03em;--dlh:1.12;--k:.78;--ebc:#C2410C}
+.slide{align-items:center;text-align:center}

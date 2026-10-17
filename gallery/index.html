@@ -1,0 +1,99 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deck themes</title>
+<style>
+  :root{--bg:#F4F5F7;--fg:#182B49;--mut:#5b6573;--line:#dde1e6}
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#111418;--fg:#e8ecf1;--mut:#9aa4b2;--line:#2a3038}}
+  *{box-sizing:border-box;margin:0}
+  body{background:var(--bg);color:var(--fg);font:16px/1.5 -apple-system,system-ui,sans-serif;padding:40px 16px 80px}
+  .wrap{max-width:1500px;margin:0 auto}
+  h1{font-size:30px;letter-spacing:-.01em} .lede{color:var(--mut);margin:6px 0 34px;max-width:820px}
+  .t{padding:28px 0 36px;border-top:1px solid var(--line)}
+  header{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+  .n{color:var(--mut);font-variant-numeric:tabular-nums} h2{font-size:22px}
+  .fonts{color:var(--mut);font-size:14px} header a{margin-left:auto;color:var(--fg);font-size:14px}
+  .t p{color:var(--mut);margin:4px 0 16px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,420px),1fr));gap:14px}
+  .f{aspect-ratio:16/9;border-radius:6px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.12),0 8px 24px rgba(0,0,0,.08)}
+  iframe{width:100%;height:100%;border:0;display:block;pointer-events:none}
+  nav{display:flex;flex-wrap:wrap;gap:8px 16px;margin-bottom:26px;font-size:14px} nav a{color:var(--fg)}
+</style></head><body><div class="wrap">
+<h1>Deck themes</h1>
+<p class="lede">Twelve themes on the same six sample slides: cover, one word, statement, comparison, number, substitution.
+Every one keeps the Trilegal ribbon and the legibility floor (nothing below 24px on the canvas, about 18pt).
+Pick the ones to keep, and tell me what to change in any of them.</p>
+<nav><a href="#keynote">Keynote Minimal</a> <a href="#vantablack">VantaBlack</a> <a href="#midnight">Midnight</a> <a href="#signal">Signal</a> <a href="#slate">Slate</a> <a href="#mono">Mono</a> <a href="#paper">Paper</a> <a href="#poster">Poster</a> <a href="#swiss">Swiss</a> <a href="#wide">Wide</a> <a href="#circuit">Circuit</a> <a href="#rounded">Rounded</a></nav>
+<section class="t" id="keynote">
+  <header><span class="n">01</span><h2>Keynote Minimal</h2>
+  <span class="fonts">Archivo + Inter</span>
+  <a href="keynote.html" target="_blank">Present ↗</a></header>
+  <p>White, navy type, Trilegal red. The house default. </p>
+  <div class="grid"><div class="f"><iframe loading="lazy" src="keynote.html#1,bare"></iframe></div><div class="f"><iframe loading="lazy" src="keynote.html#2,bare"></iframe></div><div class="f"><iframe loading="lazy" src="keynote.html#3,bare"></iframe></div><div class="f"><iframe loading="lazy" src="keynote.html#4,bare"></iframe></div><div class="f"><iframe loading="lazy" src="keynote.html#5,bare"></iframe></div><div class="f"><iframe loading="lazy" src="keynote.html#6,bare"></iframe></div></div>
+</section><section class="t" id="vantablack">
+  <header><span class="n">02</span><h2>VantaBlack</h2>
+  <span class="fonts">Inter Tight + Inter</span>
+  <a href="vantablack.html" target="_blank">Present ↗</a></header>
+  <p>Pure black stage, white type, one orange spark. Centred. </p>
+  <div class="grid"><div class="f"><iframe loading="lazy" src="vantablack.html#1,bare"></iframe></div><div class="f"><iframe loading="lazy" src="vantablack.html#2,bare"></iframe></div><div class="f"><iframe loading="lazy" src="vantablack.html#3,bare"></iframe></div><div class="f"><iframe loading="lazy" src="vantablack.html#4,bare"></iframe></div><div class="f"><iframe loading="lazy" src="vantablack.html#5,bare"></iframe></div><div class="f"><iframe loading="lazy" src="vantablack.html#6,bare"></iframe></div></div>
+</section><section class="t" id="midnight">
+  <header><span class="n">03</span><h2>Midnight</h2>
+  <span class="fonts">Plus Jakarta Sans</span>
+  <a href="midnight.html" target="_blank">Present ↗</a></header>
+  <p>Deep Trilegal navy, bright aqua. Authoritative, glare-free. </p>
+  <div class="grid"><div class="f"><iframe loading="lazy" src="midnight.html#1,bare"></iframe></div><div class="f"><iframe loading="lazy" src="midnight.html#2,bare"></iframe></div><div class="f"><iframe loading="lazy" src="midnight.html#3,bare"></iframe></div><div class="f"><iframe loading="lazy" src="midnight.html#4,bare"></iframe></div><div class="f"><iframe loading="lazy" src="midnight.html#5,bare"></iframe></div><div class="f"><iframe loading="lazy" src="midnight.html#6,bare"></iframe></div></div>
+</section><section class="t" id="signal">
+  <header><span class="n">04</span><h2>Signal</h2>
+  <span class="fonts">Barlow Condensed + Barlow</span>
+  <a href="signal.html" target="_blank">Present ↗</a></header>
+  <p>Tall condensed type with an orange bar. Brisk, newsy. </p>
+  <div class="grid"><div class="f"><iframe loading="lazy" src="signal.html#1,bare"></iframe></div><div class="f"><iframe loading="lazy" src="signal.html#2,bare"></iframe></div><div class="f"><iframe loading="lazy" src="signal.html#3,bare"></iframe></div><div class="f"><iframe loading="lazy" src="signal.html#4,bare"></iframe></div><div class="f"><iframe loading="lazy" src="signal.html#5,bare"></iframe></div><div class="f"><iframe loading="lazy" src="signal.html#6,bare"></iframe></div></div>
+</section><section class="t" id="slate">
+  <header><span class="n">05</span><h2>Slate</h2>
+  <span class="fonts">Outfit</span>
+  <a href="slate.html" target="_blank">Present ↗</a></header>
+  <p>Calm charcoal grey, geometric type, coral-red accent. </p>
+  <div class="grid"><div class="f"><iframe loading="lazy" src="slate.html#1,bare"></iframe></div><div class="f"><iframe loading="lazy" src="slate.html#2,bare"></iframe></div><div class="f"><iframe loading="lazy" src="slate.html#3,bare"></iframe></div><div class="f"><iframe loading="lazy" src="slate.html#4,bare"></iframe></div><div class="f"><iframe loading="lazy" src="slate.html#5,bare"></iframe></div><div class="f"><iframe loading="lazy" src="slate.html#6,bare"></iframe></div></div>
+</section><section class="t" id="mono">
+  <header><span class="n">06</span><h2>Mono</h2>
+  <span class="fonts">IBM Plex Mono + IBM Plex Sans</span>
+  <a href="mono.html" target="_blank">Present ↗</a></header>
+  <p>Typewriter austerity. Black on white; emphasis is a black block. </p>
+  <div class="grid"><div class="f"><iframe loading="lazy" src="mono.html#1,bare"></iframe></div><div class="f"><iframe loading="lazy" src="mono.html#2,bare"></iframe></div><div class="f"><iframe loading="lazy" src="mono.html#3,bare"></iframe></div><div class="f"><iframe loading="lazy" src="mono.html#4,bare"></iframe></div><div class="f"><iframe loading="lazy" src="mono.html#5,bare"></iframe></div><div class="f"><iframe loading="lazy" src="mono.html#6,bare"></iframe></div></div>
+</section><section class="t" id="paper">
+  <header><span class="n">07</span><h2>Paper</h2>
+  <span class="fonts">Lexend</span>
+  <a href="paper.html" target="_blank">Present ↗</a></header>
+  <p>Cool paper-white, Lexend (built for reading ease), deep aqua. </p>
+  <div class="grid"><div class="f"><iframe loading="lazy" src="paper.html#1,bare"></iframe></div><div class="f"><iframe loading="lazy" src="paper.html#2,bare"></iframe></div><div class="f"><iframe loading="lazy" src="paper.html#3,bare"></iframe></div><div class="f"><iframe loading="lazy" src="paper.html#4,bare"></iframe></div><div class="f"><iframe loading="lazy" src="paper.html#5,bare"></iframe></div><div class="f"><iframe loading="lazy" src="paper.html#6,bare"></iframe></div></div>
+</section><section class="t" id="poster">
+  <header><span class="n">08</span><h2>Poster</h2>
+  <span class="fonts">Anton + Inter</span>
+  <a href="poster.html" target="_blank">Present ↗</a></header>
+  <p>Heavy poster capitals; covers and dividers become solid red fields. </p>
+  <div class="grid"><div class="f"><iframe loading="lazy" src="poster.html#1,bare"></iframe></div><div class="f"><iframe loading="lazy" src="poster.html#2,bare"></iframe></div><div class="f"><iframe loading="lazy" src="poster.html#3,bare"></iframe></div><div class="f"><iframe loading="lazy" src="poster.html#4,bare"></iframe></div><div class="f"><iframe loading="lazy" src="poster.html#5,bare"></iframe></div><div class="f"><iframe loading="lazy" src="poster.html#6,bare"></iframe></div></div>
+</section><section class="t" id="swiss">
+  <header><span class="n">09</span><h2>Swiss</h2>
+  <span class="fonts">Schibsted Grotesk</span>
+  <a href="swiss.html" target="_blank">Present ↗</a></header>
+  <p>International style: top-left grid, black rule, red square. </p>
+  <div class="grid"><div class="f"><iframe loading="lazy" src="swiss.html#1,bare"></iframe></div><div class="f"><iframe loading="lazy" src="swiss.html#2,bare"></iframe></div><div class="f"><iframe loading="lazy" src="swiss.html#3,bare"></iframe></div><div class="f"><iframe loading="lazy" src="swiss.html#4,bare"></iframe></div><div class="f"><iframe loading="lazy" src="swiss.html#5,bare"></iframe></div><div class="f"><iframe loading="lazy" src="swiss.html#6,bare"></iframe></div></div>
+</section><section class="t" id="wide">
+  <header><span class="n">10</span><h2>Wide</h2>
+  <span class="fonts">Unbounded + Inter</span>
+  <a href="wide.html" target="_blank">Present ↗</a></header>
+  <p>Extended display type, generous space, centred. Modern and confident. </p>
+  <div class="grid"><div class="f"><iframe loading="lazy" src="wide.html#1,bare"></iframe></div><div class="f"><iframe loading="lazy" src="wide.html#2,bare"></iframe></div><div class="f"><iframe loading="lazy" src="wide.html#3,bare"></iframe></div><div class="f"><iframe loading="lazy" src="wide.html#4,bare"></iframe></div><div class="f"><iframe loading="lazy" src="wide.html#5,bare"></iframe></div><div class="f"><iframe loading="lazy" src="wide.html#6,bare"></iframe></div></div>
+</section><section class="t" id="circuit">
+  <header><span class="n">11</span><h2>Circuit</h2>
+  <span class="fonts">Space Grotesk</span>
+  <a href="circuit.html" target="_blank">Present ↗</a></header>
+  <p>Near-black with a faint grid; technical grotesk, aqua signal. </p>
+  <div class="grid"><div class="f"><iframe loading="lazy" src="circuit.html#1,bare"></iframe></div><div class="f"><iframe loading="lazy" src="circuit.html#2,bare"></iframe></div><div class="f"><iframe loading="lazy" src="circuit.html#3,bare"></iframe></div><div class="f"><iframe loading="lazy" src="circuit.html#4,bare"></iframe></div><div class="f"><iframe loading="lazy" src="circuit.html#5,bare"></iframe></div><div class="f"><iframe loading="lazy" src="circuit.html#6,bare"></iframe></div></div>
+</section><section class="t" id="rounded">
+  <header><span class="n">12</span><h2>Rounded</h2>
+  <span class="fonts">Nunito</span>
+  <a href="rounded.html" target="_blank">Present ↗</a></header>
+  <p>Soft rounded type on a pale aqua wash. Warm without the brown. </p>
+  <div class="grid"><div class="f"><iframe loading="lazy" src="rounded.html#1,bare"></iframe></div><div class="f"><iframe loading="lazy" src="rounded.html#2,bare"></iframe></div><div class="f"><iframe loading="lazy" src="rounded.html#3,bare"></iframe></div><div class="f"><iframe loading="lazy" src="rounded.html#4,bare"></iframe></div><div class="f"><iframe loading="lazy" src="rounded.html#5,bare"></iframe></div><div class="f"><iframe loading="lazy" src="rounded.html#6,bare"></iframe></div></div>
+</section>
+</div></body></html>
